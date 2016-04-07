@@ -1,9 +1,12 @@
 """Defines various one-off helpers for the package."""
 from functools import wraps
-from sqlalchemy.exc import IntegrityError
 from time import time
-from .models import IPAddr, Installation, Package, Platform, PythonVersion, db
+
+from sqlalchemy.exc import IntegrityError
+from update_checker import parse_version
 import requests
+
+from .models import IPAddr, Installation, Package, Platform, PythonVersion, db
 
 
 def configure_logging(app):
@@ -46,19 +49,29 @@ def package_cache(function):
 def get_current_version(package):
     """Return information about the current version of package."""
     try:
-        r = requests.get('http://pypi.python.org/pypi/{0}/json'
-                         .format(package))
+        response = requests.get('http://pypi.python.org/pypi/{0}/json'
+                                .format(package))
     except requests.exceptions.RequestException:
         return {'success': False}
-    if r.status_code != 200:
+    if response.status_code != 200:
         return {'success': False}
+    data = response.json()
+    versions = list(data['releases'].keys())
+    versions.sort(key=parse_version, reverse=True)
+
+    version = versions[0]
+    for tmp_version in versions:
+        if standard_release(tmp_version):
+            version = tmp_version
+            break
+
     upload_time = None
-    json_data = r.json()
-    for file_info in json_data['urls']:
-        if file_info['packagetype'] == 'sdist':
+    for file_info in data['releases'][version]:
+        if file_info['upload_time']:
             upload_time = file_info['upload_time']
+
     return {'success': True, 'data': {'upload_time': upload_time,
-                                      'version': json_data['info']['version']}}
+                                      'version': version}}
 
 
 def record_check(name, version, platform_str, python_version_str, ip):
@@ -87,6 +100,10 @@ def record_check(name, version, platform_str, python_version_str, ip):
     except IntegrityError:
         db.session.rollback()
         record_check(name, version, platform_str, python_version_str, ip)
+
+
+def standard_release(version):
+    return version.replace('.', '').isdigit()
 
 
 def versions_table(versions, unique_counts, total_counts):

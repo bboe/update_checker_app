@@ -1,9 +1,11 @@
 #!/usr/bin/env python
-from flask import Flask
-from flask.ext.sqlalchemy import SQLAlchemy
 from os import getenv
 
-__version__ = '0.2'
+from flask import Flask
+from flask.ext.sqlalchemy import SQLAlchemy
+
+
+__version__ = '0.3'
 
 DB_URI = 'postgresql://@/updatechecker'
 
@@ -14,8 +16,8 @@ APP.debug = getenv('DEBUG')
 db = SQLAlchemy(APP)
 
 # Delay these imports until db is defined
-from .controllers import *
-from .helpers import configure_logging
+from .controllers import *  # NOQA
+from .helpers import configure_logging  # NOQA
 
 configure_logging(APP)
 
