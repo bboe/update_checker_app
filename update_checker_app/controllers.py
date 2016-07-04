@@ -4,7 +4,7 @@ from flask import abort, jsonify, request, url_for
 
 from . import APP
 from .helpers import (get_current_version, normalize, record_check,
-                      versions_table)
+                      standard_release, versions_table)
 from .models import Installation, Package, PythonVersion
 
 
@@ -39,7 +39,8 @@ def check():
 
     record_check(package_name, package_version, platform, python_version,
                  request.remote_addr)
-    return jsonify(get_current_version(package_name))
+    return jsonify(get_current_version(package_name,
+                                       not standard_release(package_version)))
 
 
 @APP.route('/list')
