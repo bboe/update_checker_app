@@ -5,7 +5,7 @@ from flask import Flask
 from flask.ext.sqlalchemy import SQLAlchemy
 
 
-__version__ = '0.4'
+__version__ = '0.5'
 
 DB_URI = 'postgresql://@/updatechecker'
 
