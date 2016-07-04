@@ -33,20 +33,20 @@ def package_cache(function):
     stored = {}
 
     @wraps(function)
-    def wrapped(package_name):
+    def wrapped(*args):
         now = time()
-        if package_name in stored:
-            updated, data = stored[package_name]
+        if args in stored:
+            updated, data = stored[args]
             if now < updated + CACHE_TIME:
                 return data
-        data = function(package_name)
-        stored[package_name] = (now, data)
+        data = function(*args)
+        stored[args] = (now, data)
         return data
     return wrapped
 
 
 @package_cache
-def get_current_version(package):
+def get_current_version(package, include_prereleases):
     """Return information about the current version of package."""
     try:
         response = requests.get('http://pypi.python.org/pypi/{0}/json'
@@ -61,7 +61,7 @@ def get_current_version(package):
 
     version = versions[0]
     for tmp_version in versions:
-        if standard_release(tmp_version):
+        if include_prereleases or standard_release(tmp_version):
             version = tmp_version
             break
 
