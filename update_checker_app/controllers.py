@@ -9,7 +9,8 @@ from .models import Installation, Package, PythonVersion
 
 
 ALLOWED_PACKAGES = {'datacleaner', 'lazysusan', 'praw', 'prawtools',
-                    'redditanalysis', 'tpot', 'xrff2csv'}
+                    'redditanalysis', 'statsbot', 'topraw4', 'tpot',
+                    'xrff2csv'}
 
 
 @APP.route('/')
