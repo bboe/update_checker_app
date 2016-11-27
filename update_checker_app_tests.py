@@ -130,6 +130,7 @@ class UpdateCheckerAppTestCase(unittest.TestCase):
         self.assertEqual(httplib.OK, response.status_code)
         data = json.loads(response.get_data())
         self.assertEqual(1, len(data))
+        self.assertEqual(5, len(data[0].keys()))
         self.assertEqual(10, data[0]['count'])
         self.assertEqual('praw', data[0]['package'])
         self.assertEqual(1, data[0]['unique'])

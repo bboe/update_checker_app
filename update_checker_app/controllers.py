@@ -1,6 +1,7 @@
 import httplib
 
 from flask import Blueprint, Response, abort, jsonify, request
+from sqlalchemy import desc
 
 from .helpers import (get_current_version, normalize, record_check,
                       standard_release)
@@ -15,7 +16,7 @@ LIMIT = db.text('now() - interval \'1 day\'')
 INSTALLATION_FILTER = db.and_(Installation.created_at > LIMIT,
                               Installation.package_id == Package.id)
 
-INSTALLATION_QUERY_TITLES = ['package', 'version', 'unique', 'count']
+INSTALLATION_QUERY_TITLES = ['id', 'package', 'version', 'unique', 'count']
 
 blueprint = Blueprint('main', __name__)
 
@@ -53,12 +54,14 @@ def home():
 
 @blueprint.route('/packages')
 def packages():
-    query = (db.session.query(db.func.max(Package.package_name),
+    query = (db.session.query(db.func.max(Package.id),
+                              db.func.max(Package.package_name),
                               db.func.max(Package.package_version),
                               db.func.count(Installation.id),
                               db.func.sum(Installation.count))
              .filter(INSTALLATION_FILTER)
-             .group_by(Installation.package_id))
+             .group_by(Installation.package_id)
+             .order_by(desc(db.func.count(Installation.id))))
 
     results = []
     for row in query.all():
