@@ -47,6 +47,8 @@ class UpdateCheckerAppTestCase(unittest.TestCase):
 
     def test_check__blank_attribute(self):
         for attribute in CHECK_ATTRS:
+            if attribute == 'package_name':
+                continue
             response = self.check(**{attribute: ''})
             self.assertEqual(httplib.BAD_REQUEST, response.status_code)
             self.assertIn('Bad Request', response.get_data())
@@ -61,6 +63,11 @@ class UpdateCheckerAppTestCase(unittest.TestCase):
         response = self.check(user_agent='not_requests')
         self.assertEqual(httplib.FORBIDDEN, response.status_code)
         self.assertIn('Forbidden', response.get_data())
+
+    def test_check__unsupported_package(self):
+        response = self.check(package_name='')
+        self.assertEqual(httplib.UNPROCESSABLE_ENTITY, response.status_code)
+        self.assertIn('Unprocessable Entity', response.get_data())
 
     def test_packages__multiple_packages(self):
         for package in ['praw', 'prawtools']:

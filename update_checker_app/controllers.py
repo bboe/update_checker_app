@@ -33,7 +33,7 @@ def check():
 
     package_name = normalize(request.json['package_name'])
     if package_name not in ALLOWED_PACKAGES:
-        abort(httplib.BAD_REQUEST)
+        abort(httplib.UNPROCESSABLE_ENTITY)
 
     package_version = request.json['package_version'].strip()
     platform = normalize(request.json['platform'])
