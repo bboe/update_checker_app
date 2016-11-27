@@ -21,7 +21,7 @@ setup(name=PACKAGE_NAME,
                    'update_checker package.'),
       entry_points={'console_scripts':
                     ['{0}={0}:main'.format(PACKAGE_NAME)]},
-      install_requires=['flask >=0.10.1, <1',
+      install_requires=['flask >=0.11, <1',
                         'flask_sqlalchemy >=2.1, <3',
                         'psycopg2 >=2.6.1, <3',
                         'requests >=2.8.1, <3',

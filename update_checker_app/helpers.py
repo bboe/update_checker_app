@@ -74,7 +74,8 @@ def get_current_version(package, include_prereleases):
                                       'version': version}}
 
 
-def record_check(name, version, platform_str, python_version_str, ip):
+def record_check(name, version, platform_str, python_version_str, ip,
+                 retries=2):
     """Record the update check."""
     package = Package.fetch_or_create(package_name=name,
                                       package_version=version)
@@ -99,18 +100,12 @@ def record_check(name, version, platform_str, python_version_str, ip):
         db.session.commit()
     except IntegrityError:
         db.session.rollback()
-        record_check(name, version, platform_str, python_version_str, ip)
+        if retries > 0:
+            record_check(name, version, platform_str, python_version_str, ip,
+                         retries=retries - 1)
+        else:
+            raise
 
 
 def standard_release(version):
     return version.replace('.', '').isdigit()
-
-
-def versions_table(versions, unique_counts, total_counts):
-    rows = ['<tr><th>Version</th><th>Unique</th><th>Total</th></tr>']
-    for i, version in enumerate(versions):
-        rows.append('<tr><td>{0}</td><td>{1}</td><td>{2}</td></tr>'
-                    .format(version, unique_counts[i], total_counts[i]))
-    rows.append('<tr><td>Sum</td><td>{0}</td><td>{1}</td></tr>'
-                .format(sum(unique_counts), sum(total_counts)))
-    return '<table>\n{0}</table>\n'.format('\n'.join(rows))
