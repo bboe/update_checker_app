@@ -1,27 +1,28 @@
-#!/usr/bin/env python
 from os import getenv
 
 from flask import Flask
-from flask.ext.sqlalchemy import SQLAlchemy
+
+from .controllers import blueprint
+from .helpers import configure_logging
+from .models import db
+
+__version__ = '0.7'
 
 
-__version__ = '0.6'
+def create_app(db_uri='postgresql://@/updatechecker'):
+    app = Flask(__name__)
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.debug = getenv('DEBUG')
+    app.register_blueprint(blueprint)
+    db.init_app(app)
+    return app
 
-DB_URI = 'postgresql://@/updatechecker'
 
-APP = Flask(__name__)
-APP.config['SQLALCHEMY_DATABASE_URI'] = DB_URI
-APP.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-APP.debug = getenv('DEBUG')
-db = SQLAlchemy(APP)
-
-# Delay these imports until db is defined
-from .controllers import *  # NOQA
-from .helpers import configure_logging  # NOQA
-
-configure_logging(APP)
+app = create_app()
+configure_logging(app)
 
 
 def main():
-    db.create_all()
-    APP.run('', 65429, processes=4)
+    db.create_all(app=app)
+    app.run('', 65429, processes=4)
