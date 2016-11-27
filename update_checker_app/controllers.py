@@ -1,6 +1,6 @@
 import httplib
 
-from flask import Blueprint, abort, jsonify, request
+from flask import Blueprint, Response, abort, jsonify, request
 
 from .helpers import (get_current_version, normalize, record_check,
                       standard_release)
@@ -63,4 +63,6 @@ def packages():
     results = []
     for row in query.all():
         results.append(dict(zip(INSTALLATION_QUERY_TITLES, row)))
-    return jsonify(results)
+    response = jsonify(results)
+    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    return response

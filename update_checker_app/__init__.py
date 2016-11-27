@@ -6,7 +6,7 @@ from .controllers import blueprint
 from .helpers import configure_logging
 from .models import db
 
-__version__ = '0.7'
+__version__ = '0.8'
 
 
 def create_app(db_uri='postgresql://@/updatechecker'):
