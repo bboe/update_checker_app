@@ -28,13 +28,14 @@ class UpdateCheckerAppTestCase(unittest.TestCase):
             db.drop_all(app=self.app)
 
     def test_check(self):
-        response = self.check()
-        self.assertEqual(httplib.OK, response.status_code)
-        data = json.loads(response.get_data())
-        self.assertEqual(['data', 'success'], data.keys())
-        self.assertEqual(['upload_time', 'version'], data['data'].keys())
-        self.assertTrue(data['success'])
-        self.assertEqual('3.6.0', data['data']['version'])
+        for package in ['praw', 'resources.lib.modules.praw']:
+            response = self.check(package_name=package)
+            self.assertEqual(httplib.OK, response.status_code)
+            data = json.loads(response.get_data())
+            self.assertEqual(['data', 'success'], data.keys())
+            self.assertEqual(['upload_time', 'version'], data['data'].keys())
+            self.assertTrue(data['success'])
+            self.assertEqual('3.6.0', data['data']['version'])
 
     def test_check__prerelease(self):
         response = self.check(package_version='3.0b1')

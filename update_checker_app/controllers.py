@@ -31,7 +31,7 @@ def check():
     if not request.json or not required.issubset(request.json):
         abort(httplib.BAD_REQUEST)
 
-    package_name = normalize(request.json['package_name'])
+    package_name = normalize(request.json['package_name'].rsplit('.', 1)[-1])
     if package_name not in ALLOWED_PACKAGES:
         abort(httplib.UNPROCESSABLE_ENTITY)
 
