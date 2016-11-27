@@ -47,7 +47,7 @@ class UpdateCheckerAppTestCase(unittest.TestCase):
 
     def test_check__blank_attribute(self):
         for attribute in CHECK_ATTRS:
-            if attribute == 'package_name':
+            if attribute in ['package_name', 'platform']:
                 continue
             response = self.check(**{attribute: ''})
             self.assertEqual(httplib.BAD_REQUEST, response.status_code)

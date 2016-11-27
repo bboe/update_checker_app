@@ -36,7 +36,8 @@ def check():
         abort(httplib.UNPROCESSABLE_ENTITY)
 
     package_version = request.json['package_version'].strip()
-    platform = normalize(request.json['platform'])
+    # Many many requests come in with '' as the platform.
+    platform = normalize(request.json['platform']) or 'NOPLATFORM'
     python_version = normalize(request.json['python_version'])
     if not (package_version and platform and python_version):
         abort(httplib.BAD_REQUEST)
