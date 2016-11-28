@@ -37,7 +37,7 @@ def check():
 
     package_version = request.json['package_version'].strip()
     # Many many requests come in with '' as the platform.
-    platform = normalize(request.json['platform']) or 'NOPLATFORM'
+    platform = normalize(request.json['platform'])
     python_version = normalize(request.json['python_version'])
     if not (package_version and platform and python_version):
         abort(httplib.BAD_REQUEST)
