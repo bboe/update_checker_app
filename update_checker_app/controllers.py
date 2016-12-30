@@ -11,6 +11,7 @@ from .models import Installation, Package, db
 ALLOWED_PACKAGES = {'datacleaner', 'lazysusan', 'praw', 'prawtools',
                     'redditanalysis', 'statsbot', 'topraw4', 'tpot',
                     'xrff2csv'}
+ALLOWED_ORIGINS = {'http://bboe.github.io', 'http://localhost:8080'}
 
 LIMIT = db.text('now() - interval \'1 day\'')
 INSTALLATION_FILTER = db.and_(Installation.created_at > LIMIT,
@@ -68,5 +69,7 @@ def packages():
     for row in query.all():
         results.append(dict(zip(INSTALLATION_QUERY_TITLES, row)))
     response = jsonify(results)
-    response.headers['Access-Control-Allow-Origin'] = 'http://localhost:8080'
+    origin = request.headers.get('Origin', '')
+    if origin in ALLOWED_ORIGINS:
+        response.headers['Access-Control-Allow-Origin'] = origin
     return response

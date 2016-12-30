@@ -2,6 +2,7 @@ import httplib
 import json
 
 from update_checker_app import create_app, db
+from update_checker_app.controllers import ALLOWED_ORIGINS
 import unittest
 
 
@@ -100,6 +101,22 @@ class UpdateCheckerAppTestCase(unittest.TestCase):
             self.assertEqual(1, data[0]['unique'])
             self.assertIn('version', item)
 
+    def test_packages__origins_allowed(self):
+        assert len(ALLOWED_ORIGINS) > 0
+        for origin in ALLOWED_ORIGINS:
+            response = self.client.get('/packages', headers={'Origin': origin})
+            self.assertEqual(httplib.OK, response.status_code)
+            self.assertEqual(origin,
+                             response.headers['Access-Control-Allow-Origin'])
+
+    def test_packages__origins_not_allowed(self):
+        assert len(ALLOWED_ORIGINS) > 0
+        for origin in ALLOWED_ORIGINS:
+            response = self.client.get('/packages',
+                                       headers={'Origin': origin + 'a'})
+            self.assertEqual(httplib.OK, response.status_code)
+            self.assertNotIn('Access-Control-Allow-Origin', response.headers)
+
     def test_packages__single_entry(self):
         response = self.check()
         self.assertEqual(httplib.OK, response.status_code)
@@ -107,8 +124,6 @@ class UpdateCheckerAppTestCase(unittest.TestCase):
         response = self.client.get('/packages')
         self.assertEqual(httplib.OK, response.status_code)
         data = json.loads(response.get_data())
-        self.assertEqual('http://localhost:8080',
-                         response.headers.get('Access-Control-Allow-Origin'))
         self.assertEqual(1, len(data))
         self.assertEqual(1, data[0]['count'])
         self.assertEqual('praw', data[0]['package'])
