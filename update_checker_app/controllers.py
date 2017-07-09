@@ -8,7 +8,7 @@ from .helpers import (get_current_version, normalize, record_check,
 from .models import Installation, Package, db
 
 
-ALLOWED_PACKAGES = {'datacleaner', 'lazysusan', 'praw', 'prawtools',
+ALLOWED_PACKAGES = {'datacleaner', 'hackday_bot', 'praw', 'prawtools',
                     'redditanalysis', 'statsbot', 'topraw4', 'tpot',
                     'xrff2csv'}
 ALLOWED_ORIGINS = {'http://bboe.github.io', 'http://localhost:8080'}
