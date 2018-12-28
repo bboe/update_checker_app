@@ -1,4 +1,4 @@
-import httplib
+import http.client
 
 from flask import Blueprint, Response, abort, jsonify, request
 from sqlalchemy import desc
@@ -25,23 +25,23 @@ blueprint = Blueprint('main', __name__)
 @blueprint.route('/check', methods=['PUT'])
 def check():
     if 'python-requests' not in request.headers.get('User-Agent', ''):
-        abort(httplib.FORBIDDEN)
+        abort(http.client.FORBIDDEN)
     required = set(('package_name', 'package_version', 'platform',
                    'python_version'))
 
     if not request.json or not required.issubset(request.json):
-        abort(httplib.BAD_REQUEST)
+        abort(http.client.BAD_REQUEST)
 
     package_name = normalize(request.json['package_name'].rsplit('.', 1)[-1])
     if package_name not in ALLOWED_PACKAGES:
-        abort(httplib.UNPROCESSABLE_ENTITY)
+        abort(http.client.UNPROCESSABLE_ENTITY)
 
     package_version = request.json['package_version'].strip()
     # Many many requests come in with '' as the platform.
     platform = normalize(request.json['platform'])
     python_version = normalize(request.json['python_version'])
     if not (package_version and platform and python_version):
-        abort(httplib.BAD_REQUEST)
+        abort(http.client.BAD_REQUEST)
 
     record_check(package_name, package_version, platform, python_version,
                  request.remote_addr)
@@ -51,7 +51,7 @@ def check():
 
 @blueprint.route('/')
 def home():
-    return ('', httplib.NO_CONTENT)
+    return ('', http.client.NO_CONTENT)
 
 
 @blueprint.route('/packages')

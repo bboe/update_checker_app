@@ -1,4 +1,4 @@
-import httplib
+import http.client
 import json
 
 from update_checker_app import create_app, db
@@ -31,7 +31,7 @@ class UpdateCheckerAppTestCase(unittest.TestCase):
     def test_check(self):
         for package in ['praw', 'resources.lib.modules.praw']:
             response = self.check(package_name=package)
-            self.assertEqual(httplib.OK, response.status_code)
+            self.assertEqual(http.client.OK, response.status_code)
             data = json.loads(response.get_data())
             self.assertEqual(['data', 'success'], data.keys())
             self.assertEqual(['upload_time', 'version'], data['data'].keys())
@@ -40,7 +40,7 @@ class UpdateCheckerAppTestCase(unittest.TestCase):
 
     def test_check__prerelease(self):
         response = self.check(package_version='3.0b1')
-        self.assertEqual(httplib.OK, response.status_code)
+        self.assertEqual(http.client.OK, response.status_code)
         data = json.loads(response.get_data())
         self.assertEqual(['data', 'success'], data.keys())
         self.assertEqual(['upload_time', 'version'], data['data'].keys())
@@ -52,32 +52,32 @@ class UpdateCheckerAppTestCase(unittest.TestCase):
             if attribute == 'package_name':
                 continue
             response = self.check(**{attribute: ''})
-            self.assertEqual(httplib.BAD_REQUEST, response.status_code)
+            self.assertEqual(http.client.BAD_REQUEST, response.status_code)
             self.assertIn('Bad Request', response.get_data())
 
     def test_check__missing_attribute(self):
         for attribute in CHECK_ATTRS:
             response = self.check(**{attribute: None})
-            self.assertEqual(httplib.BAD_REQUEST, response.status_code)
+            self.assertEqual(http.client.BAD_REQUEST, response.status_code)
             self.assertIn('Bad Request', response.get_data())
 
     def test_check__not_requests(self):
         response = self.check(user_agent='not_requests')
-        self.assertEqual(httplib.FORBIDDEN, response.status_code)
+        self.assertEqual(http.client.FORBIDDEN, response.status_code)
         self.assertIn('Forbidden', response.get_data())
 
     def test_check__unsupported_package(self):
         response = self.check(package_name='')
-        self.assertEqual(httplib.UNPROCESSABLE_ENTITY, response.status_code)
+        self.assertEqual(http.client.UNPROCESSABLE_ENTITY, response.status_code)
         self.assertIn('Unprocessable Entity', response.get_data())
 
     def test_packages__multiple_packages(self):
         for package in ['praw', 'prawtools']:
             response = self.check(package_name=package)
-            self.assertEqual(httplib.OK, response.status_code)
+            self.assertEqual(http.client.OK, response.status_code)
 
         response = self.client.get('/packages')
-        self.assertEqual(httplib.OK, response.status_code)
+        self.assertEqual(http.client.OK, response.status_code)
         data = json.loads(response.get_data())
         self.assertEqual(2, len(data))
         for item in data:
@@ -89,10 +89,10 @@ class UpdateCheckerAppTestCase(unittest.TestCase):
     def test_packages__multiple_versions(self):
         for i in range(10):
             response = self.check(package_version='3.0.{}'.format(i))
-            self.assertEqual(httplib.OK, response.status_code)
+            self.assertEqual(http.client.OK, response.status_code)
 
         response = self.client.get('/packages')
-        self.assertEqual(httplib.OK, response.status_code)
+        self.assertEqual(http.client.OK, response.status_code)
         data = json.loads(response.get_data())
         self.assertEqual(10, len(data))
         for item in data:
@@ -105,7 +105,7 @@ class UpdateCheckerAppTestCase(unittest.TestCase):
         assert len(ALLOWED_ORIGINS) > 0
         for origin in ALLOWED_ORIGINS:
             response = self.client.get('/packages', headers={'Origin': origin})
-            self.assertEqual(httplib.OK, response.status_code)
+            self.assertEqual(http.client.OK, response.status_code)
             self.assertEqual(origin,
                              response.headers['Access-Control-Allow-Origin'])
 
@@ -114,15 +114,15 @@ class UpdateCheckerAppTestCase(unittest.TestCase):
         for origin in ALLOWED_ORIGINS:
             response = self.client.get('/packages',
                                        headers={'Origin': origin + 'a'})
-            self.assertEqual(httplib.OK, response.status_code)
+            self.assertEqual(http.client.OK, response.status_code)
             self.assertNotIn('Access-Control-Allow-Origin', response.headers)
 
     def test_packages__single_entry(self):
         response = self.check()
-        self.assertEqual(httplib.OK, response.status_code)
+        self.assertEqual(http.client.OK, response.status_code)
 
         response = self.client.get('/packages')
-        self.assertEqual(httplib.OK, response.status_code)
+        self.assertEqual(http.client.OK, response.status_code)
         data = json.loads(response.get_data())
         self.assertEqual(1, len(data))
         self.assertEqual(1, data[0]['count'])
@@ -133,10 +133,10 @@ class UpdateCheckerAppTestCase(unittest.TestCase):
     def test_packages__single_package_multiple_addresses(self):
         for i in range(1, 11):
             response = self.check(ip_address='127.0.0.{}'.format(i))
-            self.assertEqual(httplib.OK, response.status_code)
+            self.assertEqual(http.client.OK, response.status_code)
 
         response = self.client.get('/packages')
-        self.assertEqual(httplib.OK, response.status_code)
+        self.assertEqual(http.client.OK, response.status_code)
         data = json.loads(response.get_data())
         self.assertEqual(1, len(data))
         self.assertEqual(10, data[0]['count'])
@@ -147,10 +147,10 @@ class UpdateCheckerAppTestCase(unittest.TestCase):
     def test_packages__single_package_single_address(self):
         for _ in range(10):
             response = self.check()
-            self.assertEqual(httplib.OK, response.status_code)
+            self.assertEqual(http.client.OK, response.status_code)
 
         response = self.client.get('/packages')
-        self.assertEqual(httplib.OK, response.status_code)
+        self.assertEqual(http.client.OK, response.status_code)
         data = json.loads(response.get_data())
         self.assertEqual(1, len(data))
         self.assertEqual(5, len(data[0].keys()))
@@ -161,12 +161,12 @@ class UpdateCheckerAppTestCase(unittest.TestCase):
 
     def test_packages__no_data(self):
         response = self.client.get('/packages')
-        self.assertEqual(httplib.OK, response.status_code)
+        self.assertEqual(http.client.OK, response.status_code)
         self.assertEqual([], json.loads(response.get_data()))
 
     def test_root(self):
         response = self.client.get('/')
-        self.assertEqual(httplib.NO_CONTENT, response.status_code)
+        self.assertEqual(http.client.NO_CONTENT, response.status_code)
         self.assertEqual('', response.get_data())
 
 
